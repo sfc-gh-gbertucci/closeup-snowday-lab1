@@ -13,7 +13,7 @@
 - [Step 5: Build the Agent (~15 min)](#step-5-build-the-agent-15-min)
 - [Step 6: Use the Agent in Snowflake Intelligence (~12 min)](#step-6-use-the-agent-in-snowflake-intelligence-12-min)
 - [Step 7: Security & Consumption (~10 min)](#step-7-security--consumption-10-min)
-- [Step 8: Cleanup (after the event) (~0 min)](#step-8-cleanup-after-the-event-0-min)
+- [Step 8: Cleanup (after the event) (After the event)](#step-8-cleanup-after-the-event-after-the-event)
 
 ## Overview
 
@@ -142,7 +142,7 @@ LIMIT 300;
 
 > **Model availability** 
 >
-> Model availability depends on your account region. If you get `unknown model`, either use another model (for example `'claude-3-5-sonnet'` where available) or enable cross-region inference: `ALTER ACCOUNT SET CORTEX_ENABLED_CROSS_REGION = 'ANY_REGION';`
+> Model availability depends on your account region. If you get `unknown model`, either use another model available in your region (see `SHOW MODELS IN SNOWFLAKE.MODELS`, or the Cortex AI model list in the docs) or enable cross-region inference: `ALTER ACCOUNT SET CORTEX_ENABLED_CROSS_REGION = 'ANY_REGION';`
 
 ### 2.3 Explore the results
 
@@ -883,9 +883,16 @@ Note what the role does **not** get: the RAW schema (with the raw field notes) a
 
 ```sql
 USE ROLE HOL1_BUSINESS_USER;
+USE SECONDARY ROLES NONE;   -- test ONLY this role's privileges
 SELECT COUNT(*) FROM CLOSEUP_HOL1.ANALYTICS.DT_MONTHLY_MARKET_SHARE;   -- works
-SELECT COUNT(*) FROM CLOSEUP_HOL1.RAW.SELL_OUT;                         -- fails: not authorized
+SELECT COUNT(*) FROM CLOSEUP_HOL1.RAW.SELL_OUT;                         -- fails: not authorized (expected!)
+
+-- Back to normal
+USE ROLE ACCOUNTADMIN;
+USE SECONDARY ROLES ALL;
 ```
+
+> **Secondary roles.**  Many accounts default to `USE SECONDARY ROLES ALL`, so your session silently keeps the privileges of every role you have (including ACCOUNTADMIN). `USE SECONDARY ROLES NONE` makes you test exactly like a business user.
 
 Then open Snowflake Intelligence with role `HOL1_BUSINESS_USER` and ask the agent a question — it works with only these grants.
 
@@ -934,7 +941,7 @@ SHOW WAREHOUSES LIKE 'CLOSEUP_HOL1_WH';   -- column resource_monitor = CLOSEUP_H
 
 ---
 
-## Step 8: Cleanup (after the event) (~0 min)
+## Step 8: Cleanup (after the event) (After the event)
 
 ### Clean up
 
@@ -1010,7 +1017,7 @@ In about two and a half hours you went **from zero to an AI agent** on Close-Up-
 
 ## Congratulations!
 
-You went from zero to a working AI agent: ingestion, transformation, AI enrichment, a semantic layer, search and an agent in Snowflake Intelligence — all on a single platform.
+You went from raw data to a governed, cost-controlled AI agent: AI enrichment, a semantic layer, search and an agent in Snowflake Intelligence — all on a single platform.
 
 ---
 

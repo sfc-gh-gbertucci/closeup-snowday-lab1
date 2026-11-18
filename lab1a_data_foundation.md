@@ -940,7 +940,7 @@ Your dashboard shows 4 tiles and changing the date range updates Tile 4. Share i
 
 ## Congratulations!
 
-You went from zero to a working AI agent: ingestion, transformation, AI enrichment, a semantic layer, search and an agent in Snowflake Intelligence — all on a single platform.
+You built the data foundation: ingestion, storage, Dynamic Tables and a dashboard. Keep these objects — tomorrow in Lab 1B you turn them into an AI agent.
 
 ---
 

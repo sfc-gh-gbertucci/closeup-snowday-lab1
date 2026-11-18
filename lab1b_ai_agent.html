@@ -80,7 +80,7 @@ footer{text-align:center;padding:24px;background:var(--sf-dark);color:#cfe0ea;fo
 <li><a href="#step-5" class="nav-link" data-step="5"><span class="nav-check" id="nav-check-5"></span>5. Build the Agent <span class="nav-time">15 min</span></a></li>
 <li><a href="#step-6" class="nav-link" data-step="6"><span class="nav-check" id="nav-check-6"></span>6. Use the Agent in Snowflake Intelligence <span class="nav-time">12 min</span></a></li>
 <li><a href="#step-7" class="nav-link" data-step="7"><span class="nav-check" id="nav-check-7"></span>7. Security & Consumption <span class="nav-time">10 min</span></a></li>
-<li><a href="#step-8" class="nav-link" data-step="8"><span class="nav-check" id="nav-check-8"></span>8. Cleanup (after the event) <span class="nav-time">0 min</span></a></li>
+<li><a href="#step-8" class="nav-link" data-step="8"><span class="nav-check" id="nav-check-8"></span>8. Cleanup (after the event) <span class="nav-time">after</span></a></li>
 <li><a href="#resources" class="nav-link">Resources</a></li></ul></nav>
 <main>
 <section class="card" id="overview"><h2>Overview</h2>
@@ -223,7 +223,7 @@ LIMIT 300;</code></pre>
 
 <div class="info-box tip">
     <strong>Model availability</strong>
-    <p>Model availability depends on your account region. If you get <code>unknown model</code>, either use another model (for example <code>'claude-3-5-sonnet'</code> where available) or enable cross-region inference: <code>ALTER ACCOUNT SET CORTEX_ENABLED_CROSS_REGION = 'ANY_REGION';</code></p>
+    <p>Model availability depends on your account region. If you get <code>unknown model</code>, either use another model available in your region (see <code>SHOW MODELS IN SNOWFLAKE.MODELS</code>, or the Cortex AI model list in the docs) or enable cross-region inference: <code>ALTER ACCOUNT SET CORTEX_ENABLED_CROSS_REGION = 'ANY_REGION';</code></p>
 </div>
 
 
@@ -1116,10 +1116,16 @@ GRANT ROLE HOL1_BUSINESS_USER TO USER IDENTIFIER($ME);</code></pre>
         </div>
     </div>
     <pre><code class="language-sql">USE ROLE HOL1_BUSINESS_USER;
+USE SECONDARY ROLES NONE;   -- test ONLY this role's privileges
 SELECT COUNT(*) FROM CLOSEUP_HOL1.ANALYTICS.DT_MONTHLY_MARKET_SHARE;   -- works
-SELECT COUNT(*) FROM CLOSEUP_HOL1.RAW.SELL_OUT;                         -- fails: not authorized</code></pre>
+SELECT COUNT(*) FROM CLOSEUP_HOL1.RAW.SELL_OUT;                         -- fails: not authorized (expected!)
+
+-- Back to normal
+USE ROLE ACCOUNTADMIN;
+USE SECONDARY ROLES ALL;</code></pre>
 </div>
 
+<div class="info-box warning"><strong>Secondary roles.</strong> Many accounts default to <code>USE SECONDARY ROLES ALL</code>, so your session silently keeps the privileges of every role you have (including ACCOUNTADMIN). <code>USE SECONDARY ROLES NONE</code> makes you test exactly like a business user.</div>
 <p>Then open Snowflake Intelligence with role <code>HOL1_BUSINESS_USER</code> and ask the agent a question &mdash; it works with only these grants.</p>
 
 <h3>7.3 Guardrail: a resource monitor on the warehouse</h3>
@@ -1184,7 +1190,7 @@ SHOW WAREHOUSES LIKE 'CLOSEUP_HOL1_WH';   -- column resource_monitor = CLOSEUP_H
 </div>
 </section>
 <section class="step-card" id="step-8">
-<div class="step-header" onclick="toggleStep(8)"><span class="step-number">8</span><h2 class="step-title">Cleanup (after the event)</h2><span class="step-duration">~0 min</span>
+<div class="step-header" onclick="toggleStep(8)"><span class="step-number">8</span><h2 class="step-title">Cleanup (after the event)</h2><span class="step-duration">After the event</span>
 <label class="step-complete" onclick="event.stopPropagation()"><input type="checkbox" id="check-8" onchange="markStepComplete(8)"> Done</label></div>
 <div class="step-content"><h3>Clean up</h3>
 <p>Run this only when you are done exploring. It removes every object created in this lab.</p>
@@ -1275,7 +1281,7 @@ SHOW AGENTS LIKE 'PHARMA_MARKET_AGENT' IN SCHEMA SNOWFLAKE_INTELLIGENCE.AGENTS;
 <li><a href="https://www.snowflake.com/en/developers/guides/sfguide-build-end-to-end-ai-app-on-snowflake/" target="_blank">Guide: Build an End-to-End AI App on Snowflake</a></li>
 <li><a href="https://www.snowflake.com/en/developers/guides/best-practices-to-building-cortex-agents/" target="_blank">Guide: Best Practices to Building Cortex Agents</a></li></ul></section>
 <section class="card completion" id="completion"><h2>Congratulations!</h2>
-<p>You went from zero to a working AI agent: ingestion, transformation, AI enrichment, a semantic layer, search and an agent in Snowflake Intelligence — all on a single platform.</p></section>
+<p>You went from raw data to a governed, cost-controlled AI agent: AI enrichment, a semantic layer, search and an agent in Snowflake Intelligence &mdash; all on a single platform.</p></section>
 </main></div>
 <footer>© 2026 Snowflake Inc. All Rights Reserved.</footer>
 <script>
