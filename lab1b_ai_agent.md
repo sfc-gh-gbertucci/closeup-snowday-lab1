@@ -17,22 +17,19 @@
 
 ## Overview
 
-In this lab you will build an end-to-end pharma market intelligence solution on Snowflake: from ingesting raw operational data to a conversational AI agent that answers quantitative and qualitative questions for business users.
+In this second part you turn yesterday's data foundation into a conversational AI agent that answers quantitative and qualitative questions for business users, and then make it secure and cost-controlled.
 
 ### What you will learn
 
-- Snowflake architecture (storage, compute, cloud services) and navigating Snowsight
-- Loading data with internal stages, file formats and COPY INTO (CSV and JSON)
-- Exploring, documenting and validating data quality
-- Building declarative transformations with views and Dynamic Tables
 - Enriching unstructured field notes with Cortex AI Functions
 - Creating a Semantic View as the business layer for Cortex Analyst
 - Creating a Cortex Search service over field notes
 - Building and using a Cortex Agent in Snowflake Intelligence following best practices
+- Least-privilege roles, resource monitors and monitoring consumption
 
 ### Technologies
 
-Snowsight · Stages & COPY · Dynamic Tables · Cortex AI Functions · Semantic Views · Cortex Search · Cortex Agents · Snowflake Intelligence
+Cortex AI Functions · Semantic Views · Cortex Analyst · Cortex Search · Cortex Agents · Snowflake Intelligence · RBAC · Resource Monitors
 
 > **Day 2 of 2 (26/11).**  This is Lab 1B. It continues from the objects
 > you built in Lab 1A yesterday. Step 1 checks them and shows how to catch up if anything is missing.
