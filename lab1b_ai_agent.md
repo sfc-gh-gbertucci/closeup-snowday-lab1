@@ -70,6 +70,11 @@ AI functions on field notes, a semantic view, a search service and an agent — 
 
 ---
 
+### Recap: what you built in Step 1
+
+- **You checked:** that the Lab 1A objects (RAW tables, curated views, Dynamic Tables) are in place, or rebuilt them with the catch-up script.
+- **Starting point for today:** governed analytics data in `CLOSEUP_HOL1`. Everything you build next sits on top of it.
+
 ## Step 2: AI on Data: Cortex AI Functions (~10 min)
 
 Close-Up's field force produces hundreds of free-text notes: competitor launches, stock-outs, price
@@ -230,6 +235,13 @@ FROM CLOSEUP_HOL1.AI.FIELD_NOTES_ENRICHED;
 Expected: `TOTAL_NOTES = 300` and all `MISSING_*` columns = 0.
 
 ---
+
+### Recap: what you built in Step 2
+
+- **You built:** `AI.FIELD_NOTES_ENRICHED`: the 300 field notes with three new columns created by AI functions: `SENTIMENT` (`AI_SENTIMENT`), `CATEGORY` (`AI_CLASSIFY`) and `SUMMARY` (`AI_COMPLETE`), plus an executive summary per therapeutic area.
+- **Before vs after:** free text that someone had to read became columns you can filter, group and count.
+- **Key idea:** AI functions are plain SQL, run inside Snowflake, and respect the same roles and policies as any other query.
+- **Take it to your projects:** any free-text column (call notes, complaints, survey answers) can be enriched the same way with a single `CREATE TABLE ... AS SELECT`.
 
 ## Step 3: Semantic Layer: Semantic Views (~15 min)
 
@@ -456,6 +468,12 @@ Expected: one row per country with `TOTAL_SHARE_PCT = 100.00`.
 
 ---
 
+### Recap: what you built in Step 3
+
+- **You built:** the semantic view `ANALYTICS.SV_PHARMA_MARKET`, with tables, relationships, dimensions, metrics, synonyms and verified queries.
+- **Key idea:** the semantic view is the business dictionary that tells the AI what "market share" or "sell-out" means and how tables join. It is a governed object with grants, and you can also query it with SQL.
+- **Take it to your projects:** define each metric once in the semantic view and reuse it for the agent and for BI, instead of rewriting the logic in every report.
+
 ## Step 4: Cortex Search (~8 min)
 
 ### What is Cortex Search?
@@ -560,6 +578,12 @@ FROM TABLE(FLATTEN(
 ```
 
 ---
+
+### Recap: what you built in Step 4
+
+- **You built:** the Cortex Search service `AI.CS_FIELD_NOTES` over the enriched field notes.
+- **Key idea:** semantic search over text, fully managed: no embedding pipeline or vector database to maintain, and it refreshes automatically when the source changes.
+- **Two tools ready:** the semantic view answers questions about numbers; Cortex Search answers questions about what the representatives wrote.
 
 ## Step 5: Build the Agent (~15 min)
 
@@ -791,6 +815,12 @@ DESCRIBE AGENT SNOWFLAKE_INTELLIGENCE.AGENTS.PHARMA_MARKET_AGENT;
 
 ---
 
+### Recap: what you built in Step 5
+
+- **You built:** the agent `SNOWFLAKE_INTELLIGENCE.AGENTS.PHARMA_MARKET_AGENT`, combining the semantic view (Cortex Analyst) and the search service, with instructions written following best practices.
+- **The flow so far:** analytics tables → semantic view + search service → agent.
+- **Key idea:** the agent decides which tool to use for each question, and it runs with the role of the user who asks.
+
 ## Step 6: Use the Agent in Snowflake Intelligence (~12 min)
 
 ### Open Snowflake Intelligence (CoWork)
@@ -878,6 +908,12 @@ SHOW SEMANTIC VIEWS IN SCHEMA CLOSEUP_HOL1.ANALYTICS;
 ```
 
 ---
+
+### Recap: what you built in Step 6
+
+- **You did:** asked the agent business questions in Snowflake Intelligence, combining numbers (semantic view) and context from field notes (search) in one answer.
+- **Key idea:** business users get answers in natural language without writing SQL, on the same governed data the analysts use.
+- **Take it to your projects:** start with a small set of well-defined questions, add them as verified queries, and grow the agent from real usage.
 
 ## Step 7: Security & Consumption (~10 min)
 
@@ -971,6 +1007,12 @@ SHOW WAREHOUSES LIKE 'CLOSEUP_HOL1_WH';   -- column resource_monitor = CLOSEUP_H
 ```
 
 ---
+
+### Recap: what you built in Step 7
+
+- **You built:** the role `HOL1_BUSINESS_USER` with read access to curated data and the agent, and the resource monitor `CLOSEUP_HOL1_RM` on the lab warehouse.
+- **Key idea:** access is granted to roles, never to users, and the agent inherits it: a user only sees through the agent what their role can see. Resource monitors cap warehouse credits.
+- **Take it to your projects:** create functional roles per audience (business, analyst, engineer) and put a resource monitor on every warehouse from day one.
 
 ## Step 8: Cleanup (after the event) (After the event)
 

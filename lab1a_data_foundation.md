@@ -114,6 +114,12 @@ SHOW WAREHOUSES LIKE 'CLOSEUP_HOL1_WH';
 
 ---
 
+### Recap: what you built in Step 1
+
+- **You built:** the lab environment: warehouse `CLOSEUP_HOL1_WH` and database `CLOSEUP_HOL1` with five schemas (`SOURCE_SYSTEM`, `RAW`, `CURATED`, `ANALYTICS`, `AI`), one per layer of the data flow.
+- **Key idea:** storage and compute are separate. The warehouse is the compute you pay for per second, and it suspends itself when idle; the database only holds data.
+- **Take it to your projects:** one schema per layer (raw, curated, analytics) keeps the flow easy to read and makes it simple to grant access by layer.
+
 ## Step 2: Ingestion: Stages & COPY (~15 min)
 
 ### The scenario
@@ -493,6 +499,13 @@ FROM TABLE(CLOSEUP_HOL1.INFORMATION_SCHEMA.COPY_HISTORY(
 
 ---
 
+### Recap: what you built in Step 2
+
+- **You built:** a simulated source system (7 tables in `SOURCE_SYSTEM`), the file formats `FF_CSV` and `FF_JSON`, the stage `LANDING_STAGE`, and the 7 `RAW` tables loaded with `COPY INTO`, including the field notes typed from JSON (`FIELD_NOTES_JSON` → `FIELD_NOTES`).
+- **The flow you ran:** source tables → files in a stage (unload) → `COPY INTO` → RAW tables. It is the same path real files from a distributor or ERP take.
+- **Key idea:** CSV and JSON land the same way; semi-structured data goes into a `VARIANT` column and is typed with `:field::TYPE`.
+- **Take it to your projects:** stage + file format + `COPY INTO` is the standard batch ingestion pattern. Keep the file formats as named objects so every load reuses the same parsing rules.
+
 ## Step 3: Storage & Exploring Data (~8 min)
 
 ### Find your data with Universal Search
@@ -641,6 +654,12 @@ ORDER BY TABLE_NAME, ORDINAL_POSITION;
 ```
 
 ---
+
+### Recap: what you built in Step 3
+
+- **You built:** documentation (comments) on the key tables, and a set of quality checks: row counts, NULLs, duplicate keys, orphan foreign keys and date coverage.
+- **Key idea:** micro-partitions and their metadata let Snowflake skip data it does not need (pruning), with no indexes to maintain; Time Travel lets you query or restore past versions.
+- **Take it to your projects:** save the step 3.2 queries as a worksheet and run them after every load. In real sources they will not always return 0.
 
 ## Step 4: Transformation: Views & Dynamic Tables (~12 min)
 
@@ -874,6 +893,13 @@ Expected: `TOTAL_SHARE_PCT` is 100.00 (or 99.99 / 100.01 due to rounding) for ev
 
 ---
 
+### Recap: what you built in Step 4
+
+- **You built:** the curated views `V_SALES` and `V_PRESCRIPTIONS`, and the Dynamic Tables `DT_MONTHLY_MARKET_SHARE` and `DT_PRESCRIPTION_TRENDS` in `ANALYTICS`.
+- **The flow so far:** RAW → CURATED (views: business logic, always current) → ANALYTICS (Dynamic Tables: pre-aggregated, refreshed automatically within the target lag).
+- **Key idea:** you declare the result and the freshness you need; Snowflake handles the refresh and shows the pipeline graph.
+- **Take it to your projects:** use views for logic that must always be current and cheap to define; use Dynamic Tables for heavier aggregations that dashboards read often.
+
 ## Step 5: Dashboards & reports with AI (~10 min)
 
 You now have curated views and Dynamic Tables. Before going to AI tomorrow, let's put them in front of
@@ -953,6 +979,13 @@ to tweak text directly (Preview / No JavaScript / Code modes).
 | Best for | Exploring, filtering, follow-up questions in CoWork | Narratives, executive briefs, meeting pre-reads |
 
 > **See you tomorrow!**  Do *not* run any cleanup today — Lab 1B continues from these objects.
+
+### Recap: what you built in Step 5
+
+- **You built:** an AI-generated dashboard and an HTML report on top of the analytics layer, published and shared from Snowflake.
+- **The complete flow of Lab 1A:** files → stage → RAW → CURATED views → ANALYTICS Dynamic Tables → dashboard and report.
+- **Key idea:** the dashboard reads governed data in Snowflake, so there is no extract to keep in sync.
+- **Take it to your projects:** the same analytics tables can feed Power BI or any BI tool; tomorrow (Lab 1B) they also feed the AI agent.
 
 ## Resources
 

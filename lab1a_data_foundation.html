@@ -189,6 +189,7 @@ SHOW WAREHOUSES LIKE 'CLOSEUP_HOL1_WH';</code></pre>
 <div class="info-box note">
     <strong>Note:</strong> <code>ACCOUNTADMIN</code> is used here only to keep the setup simple. In production, objects are created by dedicated functional roles (for example <code>SYSADMIN</code> or a team role), and <code>ACCOUNTADMIN</code> is kept for account administration.
 </div>
+<div class="info-box tip"><strong>Recap: what you built in Step 1</strong><ul><li><strong>You built:</strong> the lab environment: warehouse <code>CLOSEUP_HOL1_WH</code> and database <code>CLOSEUP_HOL1</code> with five schemas (<code>SOURCE_SYSTEM</code>, <code>RAW</code>, <code>CURATED</code>, <code>ANALYTICS</code>, <code>AI</code>), one per layer of the data flow.</li><li><strong>Key idea:</strong> storage and compute are separate. The warehouse is the compute you pay for per second, and it suspends itself when idle; the database only holds data.</li><li><strong>Take it to your projects:</strong> one schema per layer (raw, curated, analytics) keeps the flow easy to read and makes it simple to grant access by layer.</li></ul></div>
 </div>
 </section>
 <section class="step-card" id="step-2">
@@ -618,6 +619,7 @@ FROM TABLE(CLOSEUP_HOL1.INFORMATION_SCHEMA.COPY_HISTORY(
 <div class="info-box note">
     <strong>Try it:</strong> run the <code>COPY INTO CLOSEUP_HOL1.RAW.SELL_OUT ...</code> statement again. The result is <em>"Copy executed with 0 files processed"</em> because Snowflake remembers which files it already loaded. <code>FORCE = TRUE</code> overrides this, but it creates duplicate rows.
 </div>
+<div class="info-box tip"><strong>Recap: what you built in Step 2</strong><ul><li><strong>You built:</strong> a simulated source system (7 tables in <code>SOURCE_SYSTEM</code>), the file formats <code>FF_CSV</code> and <code>FF_JSON</code>, the stage <code>LANDING_STAGE</code>, and the 7 <code>RAW</code> tables loaded with <code>COPY INTO</code>, including the field notes typed from JSON (<code>FIELD_NOTES_JSON</code> → <code>FIELD_NOTES</code>).</li><li><strong>The flow you ran:</strong> source tables → files in a stage (unload) → <code>COPY INTO</code> → RAW tables. It is the same path real files from a distributor or ERP take.</li><li><strong>Key idea:</strong> CSV and JSON land the same way; semi-structured data goes into a <code>VARIANT</code> column and is typed with <code>:field::TYPE</code>.</li><li><strong>Take it to your projects:</strong> stage + file format + <code>COPY INTO</code> is the standard batch ingestion pattern. Keep the file formats as named objects so every load reuses the same parsing rules.</li></ul></div>
 </div>
 </section>
 <section class="step-card" id="step-3">
@@ -791,6 +793,7 @@ WHERE TABLE_SCHEMA = 'RAW'
   AND COMMENT IS NOT NULL
 ORDER BY TABLE_NAME, ORDINAL_POSITION;</code></pre>
 </div>
+<div class="info-box tip"><strong>Recap: what you built in Step 3</strong><ul><li><strong>You built:</strong> documentation (comments) on the key tables, and a set of quality checks: row counts, NULLs, duplicate keys, orphan foreign keys and date coverage.</li><li><strong>Key idea:</strong> micro-partitions and their metadata let Snowflake skip data it does not need (pruning), with no indexes to maintain; Time Travel lets you query or restore past versions.</li><li><strong>Take it to your projects:</strong> save the step 3.2 queries as a worksheet and run them after every load. In real sources they will not always return 0.</li></ul></div>
 </div>
 </section>
 <section class="step-card" id="step-4">
@@ -1070,6 +1073,7 @@ LIMIT 20;</code></pre>
 </div>
 
 <p>Expected: <code>TOTAL_SHARE_PCT</code> is 100.00 (or 99.99 / 100.01 due to rounding) for every row.</p>
+<div class="info-box tip"><strong>Recap: what you built in Step 4</strong><ul><li><strong>You built:</strong> the curated views <code>V_SALES</code> and <code>V_PRESCRIPTIONS</code>, and the Dynamic Tables <code>DT_MONTHLY_MARKET_SHARE</code> and <code>DT_PRESCRIPTION_TRENDS</code> in <code>ANALYTICS</code>.</li><li><strong>The flow so far:</strong> RAW → CURATED (views: business logic, always current) → ANALYTICS (Dynamic Tables: pre-aggregated, refreshed automatically within the target lag).</li><li><strong>Key idea:</strong> you declare the result and the freshness you need; Snowflake handles the refresh and shows the pipeline graph.</li><li><strong>Take it to your projects:</strong> use views for logic that must always be current and cheap to define; use Dynamic Tables for heavier aggregations that dashboards read often.</li></ul></div>
 </div>
 </section>
 <section class="step-card" id="step-5">
@@ -1173,6 +1177,7 @@ Anyone who can view it sees that data, even without access to the tables. Use <s
 <tr><td>Best for</td><td>Exploring, filtering, follow-up questions in CoWork</td><td>Narratives, executive briefs, meeting pre-reads</td></tr>
 </table>
 <div class="info-box note"><strong>See you tomorrow!</strong> Do <em>not</em> run any cleanup today &mdash; Lab 1B continues from these objects.</div>
+<div class="info-box tip"><strong>Recap: what you built in Step 5</strong><ul><li><strong>You built:</strong> an AI-generated dashboard and an HTML report on top of the analytics layer, published and shared from Snowflake.</li><li><strong>The complete flow of Lab 1A:</strong> files → stage → RAW → CURATED views → ANALYTICS Dynamic Tables → dashboard and report.</li><li><strong>Key idea:</strong> the dashboard reads governed data in Snowflake, so there is no extract to keep in sync.</li><li><strong>Take it to your projects:</strong> the same analytics tables can feed Power BI or any BI tool; tomorrow (Lab 1B) they also feed the AI agent.</li></ul></div>
 </div>
 </section>
 <section class="card" id="resources"><h2>Resources</h2><ul>
