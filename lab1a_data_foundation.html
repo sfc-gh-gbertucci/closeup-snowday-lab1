@@ -68,7 +68,7 @@ footer{text-align:center;padding:24px;background:var(--sf-dark);color:#cfe0ea;fo
 <body>
 <header class="top"><img src="https://www.logo.wine/a/logo/Snowflake_Inc./Snowflake_Inc.-Logo.wine.svg" alt="Snowflake">
 <div class="progress-wrap"><span id="progress-text">0 / 5 steps</span><div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div></div></header>
-<section class="hero"><h1>Lab 1A — Data Foundation</h1><p class="subtitle">From raw files to a dashboard — Close-Up SnowDay, Day 1 (25/11)</p>
+<section class="hero"><h1>Lab 1A — Data Foundation</h1><p class="subtitle">From raw files to dashboards &amp; reports — Close-Up SnowDay, Day 1 (25/11)</p>
 <div class="hero-meta"><span>Duration: ~50 min</span><span>Difficulty: Beginner → Intermediate</span><span>5 steps</span></div></section>
 <div class="layout">
 <nav class="sidebar"><h4>Lab Steps</h4><ul>
@@ -77,21 +77,21 @@ footer{text-align:center;padding:24px;background:var(--sf-dark);color:#cfe0ea;fo
 <li><a href="#step-2" class="nav-link" data-step="2"><span class="nav-check" id="nav-check-2"></span>2. Ingestion: Stages & COPY <span class="nav-time">15 min</span></a></li>
 <li><a href="#step-3" class="nav-link" data-step="3"><span class="nav-check" id="nav-check-3"></span>3. Storage & Exploring Data <span class="nav-time">8 min</span></a></li>
 <li><a href="#step-4" class="nav-link" data-step="4"><span class="nav-check" id="nav-check-4"></span>4. Transformation: Views & Dynamic Tables <span class="nav-time">12 min</span></a></li>
-<li><a href="#step-5" class="nav-link" data-step="5"><span class="nav-check" id="nav-check-5"></span>5. Your first Snowsight dashboard <span class="nav-time">10 min</span></a></li>
+<li><a href="#step-5" class="nav-link" data-step="5"><span class="nav-check" id="nav-check-5"></span>5. Dashboards &amp; reports with AI <span class="nav-time">10 min</span></a></li>
 <li><a href="#resources" class="nav-link">Resources</a></li></ul></nav>
 <main>
 <section class="card" id="overview"><h2>Overview</h2>
-<p>In this first part you build the data foundation of a pharma market intelligence solution on Snowflake: from raw operational files to curated, always-fresh analytics and a dashboard for business users.</p>
+<p>In this first part you build the data foundation of a pharma market intelligence solution on Snowflake: from raw operational files to curated, always-fresh analytics, a dashboard and a report for business users.</p>
 <h3>What you will learn</h3><ul>
 <li>Snowflake architecture (storage, compute, cloud services), warehouses and credits, and navigating Snowsight</li>
 <li>Loading data with internal stages, file formats and COPY INTO (CSV and JSON)</li>
 <li>Exploring, documenting and validating data quality; Time Travel</li>
 <li>Building declarative transformations with views and Dynamic Tables</li>
-<li>Building a Snowsight dashboard with charts and filters</li>
+<li>Building AI-first Dashboards and HTML reports with CoCo, and sharing them as artifacts</li>
 </ul>
-<h3>Technologies</h3><div><span class="tech-tag">Snowsight</span><span class="tech-tag">Virtual Warehouses</span><span class="tech-tag">Stages & COPY</span><span class="tech-tag">Time Travel</span><span class="tech-tag">Views</span><span class="tech-tag">Dynamic Tables</span><span class="tech-tag">Dashboards</span></div></section>
+<h3>Technologies</h3><div><span class="tech-tag">Snowsight</span><span class="tech-tag">Virtual Warehouses</span><span class="tech-tag">Stages & COPY</span><span class="tech-tag">Time Travel</span><span class="tech-tag">Views</span><span class="tech-tag">Dynamic Tables</span><span class="tech-tag">Dashboards</span><span class="tech-tag">HTML Reports</span><span class="tech-tag">CoCo</span></div></section>
 <div class="info-box note"><strong>Day 1 of 2 (25/11).</strong> This is Lab 1A: the data foundation
-(ingestion, storage, transformation and a dashboard). Tomorrow, Lab 1B continues from the objects you create today
+(ingestion, storage, transformation, a dashboard and a report). Tomorrow, Lab 1B continues from the objects you create today
 and adds AI, the semantic layer and the agent.</div>
 <div class="info-box warning"><strong>Synthetic data</strong>All data in this lab (pharmacies, laboratories, products, doctors, prescriptions, sales and field notes) is synthetically generated for training purposes only. It does not represent real Close-Up, customer or market data.</div>
 <section class="step-card" id="step-1">
@@ -1065,86 +1065,105 @@ LIMIT 20;</code></pre>
 </div>
 </section>
 <section class="step-card" id="step-5">
-<div class="step-header" onclick="toggleStep(5)"><span class="step-number">5</span><h2 class="step-title">Your first Snowsight dashboard</h2><span class="step-duration">~10 min</span>
+<div class="step-header" onclick="toggleStep(5)"><span class="step-number">5</span><h2 class="step-title">Dashboards &amp; reports with AI</h2><span class="step-duration">~10 min</span>
 <label class="step-complete" onclick="event.stopPropagation()"><input type="checkbox" id="check-5" onchange="markStepComplete(5)"> Done</label></div>
-<div class="step-content"><p>You now have curated views and Dynamic Tables. Before going to AI tomorrow, let's turn them into a
-<strong>Snowsight dashboard</strong> &mdash; no BI tool required. Each tile is just a SQL query plus a chart.</p>
+<div class="step-content"><p>You now have curated views and Dynamic Tables. Before going to AI tomorrow, let's put them in front of
+business users with two <strong>AI-first</strong> artifacts, both created by talking to <strong>CoCo</strong> (Cortex Code) in Snowsight
+Workspaces &mdash; no BI tool, no extracts:</p>
+<ul>
+<li><strong>Dashboard</strong> &mdash; live, interactive tiles. Each viewer's queries run with <em>their own</em> role (caller's rights).</li>
+<li><strong>HTML report</strong> &mdash; a designed, presentation-ready snapshot of the analysis, shareable as a link.</li>
+</ul>
+<div class="info-box note"><strong>Why not "Projects &raquo; Dashboards"?</strong> Legacy Dashboards were removed from
+Snowflake on 22/06/2026. Dashboards are now authored in Workspaces as a <code>.dash</code> file and shared as an <strong>artifact</strong>.</div>
 
-<h3>5.1 Create the dashboard</h3>
+<h3>5.1 Build the dashboard with CoCo (~5 min)</h3>
 <ol>
-<li>In Snowsight go to <strong>Projects &raquo; Dashboards &raquo; + Dashboard</strong>. Name it <code>Close-Up Market Overview</code>.</li>
-<li>Set the role to <code>ACCOUNTADMIN</code> and the warehouse to <code>CLOSEUP_HOL1_WH</code> (top right).</li>
-<li>Click <strong>+ New Tile &raquo; From SQL Worksheet</strong> for each query below, run it, open the <strong>Chart</strong> tab and pick the chart type suggested.</li>
+<li>In Snowsight go to <strong>Projects &raquo; Workspaces</strong> and open your workspace.</li>
+<li>Select <strong>+ (Add new) &raquo; Dashboard</strong> (or open the CoCo chat panel). Make sure the context is role <code>ACCOUNTADMIN</code> and warehouse <code>CLOSEUP_HOL1_WH</code>.</li>
+<li>Paste the prompt below and review the SQL that CoCo proposes before accepting it.</li>
+</ol>
+<div class="code-block" data-language="text">
+    <div class="code-header">
+        <span class="code-language">Prompt for CoCo</span>
+        <div class="code-actions">
+            <button class="btn-copy" onclick="copyCode(this)">Copy</button>
+        </div>
+    </div>
+    <pre><code class="language-text">/dashboard Build a dashboard called "Close-Up Market Overview" using CLOSEUP_HOL1.ANALYTICS.DT_MONTHLY_MARKET_SHARE,
+CLOSEUP_HOL1.ANALYTICS.DT_PRESCRIPTION_TRENDS and CLOSEUP_HOL1.CURATED.V_SALES with:
+1. A scorecard with total SALES_USD
+2. A line chart of monthly SALES_USD
+3. A bar chart of market share % by LAB_NAME
+4. A heatmap of RX_COUNT by SPECIALTY and THERAPEUTIC_AREA
+5. A table with the top 10 pharmacies by NET_AMOUNT_USD from V_SALES
+Add a date range filter on SALE_DATE that applies to the top-10 table.</code></pre>
+</div>
+
+<p>CoCo generates a <code>.dash</code> file and opens it. Now iterate in plain language &mdash; this is the point of AI-first BI:</p>
+<div class="code-block" data-language="text">
+    <div class="code-header">
+        <span class="code-language">Prompt for CoCo</span>
+        <div class="code-actions">
+            <button class="btn-copy" onclick="copyCode(this)">Copy</button>
+        </div>
+    </div>
+    <pre><code class="language-text">When someone clicks a lab in the market share chart, filter the other tiles to that lab.</code></pre>
+</div>
+
+<div class="code-block" data-language="text">
+    <div class="code-header">
+        <span class="code-language">Prompt for CoCo</span>
+        <div class="code-actions">
+            <button class="btn-copy" onclick="copyCode(this)">Copy</button>
+        </div>
+    </div>
+    <pre><code class="language-text">Change the line chart to show one line per COUNTRY.</code></pre>
+</div>
+
+<div class="info-box tip"><strong>Prefer to build it by hand?</strong> You can add tiles, write tile SQL and pick charts
+without CoCo. Filters are wired into tile SQL with a <code>{{ filter('name') }}</code> placeholder, for example:
+<code>WHERE {{ filter('sale_date') }}</code>. The reference queries are in <code>sql/lab1a/step05.sql</code> in the repo.</div>
+
+<h3>5.2 Build an HTML report with CoCo (~3 min)</h3>
+<p>Dashboards are for exploring; a report is for <em>telling the story</em> (e.g. a deck-like brief for a meeting).
+In the same workspace select <strong>+ (Add new) &raquo; Report</strong>, or ask CoCo:</p>
+<div class="code-block" data-language="text">
+    <div class="code-header">
+        <span class="code-language">Prompt for CoCo</span>
+        <div class="code-actions">
+            <button class="btn-copy" onclick="copyCode(this)">Copy</button>
+        </div>
+    </div>
+    <pre><code class="language-text">Create an HTML report "Close-Up Market Brief" from CLOSEUP_HOL1.ANALYTICS.DT_MONTHLY_MARKET_SHARE:
+a headline with total sales and the top laboratory, a monthly sales trend chart, a market share bar chart
+and 3 bullet-point insights. Use Snowflake colors and format it as full-width sections that scroll like slides.</code></pre>
+</div>
+
+<p>CoCo runs the queries, writes an <code>.html</code> file in your workspace and shows a preview. Use <strong>Edit</strong>
+to tweak text directly (Preview / No JavaScript / Code modes).</p>
+<div class="info-box warning"><strong>Snapshot data.</strong> A report embeds the query results at the moment it was generated.
+Anyone who can view it sees that data, even without access to the tables. Use <strong>Refresh report</strong> and publish again to update it.</div>
+
+<h3>5.3 Publish and share (~2 min)</h3>
+<ol>
+<li>Open the <code>.dash</code> file and select <strong>Publish artifact</strong>. Under <strong>Who has access</strong> keep yourself (or add a role) and select <strong>Create</strong>. The link is copied.</li>
+<li>Do the same for the <code>.html</code> report.</li>
+<li>Open <strong>Projects &raquo; Artifacts</strong>: both appear there. Later edits to the files are published to the <em>same</em> link.</li>
 </ol>
 
-<h3>5.2 Tile 1 &mdash; Monthly sales trend (Line chart)</h3>
-<div class="code-block" data-language="sql">
-    <div class="code-header">
-        <span class="code-language">SQL</span>
-        <div class="code-actions">
-            <button class="btn-copy" onclick="copyCode(this)">Copy</button>
-        </div>
-    </div>
-    <pre><code class="language-sql">SELECT MONTH, SUM(SALES_USD) AS SALES_USD
-FROM CLOSEUP_HOL1.ANALYTICS.DT_MONTHLY_MARKET_SHARE
-GROUP BY MONTH
-ORDER BY MONTH;</code></pre>
-</div>
-
-<p>Chart: <strong>Line</strong>, X = <code>MONTH</code>, Y = <code>SALES_USD</code>.</p>
-
-<h3>5.3 Tile 2 &mdash; Market share by laboratory (Bar chart)</h3>
-<div class="code-block" data-language="sql">
-    <div class="code-header">
-        <span class="code-language">SQL</span>
-        <div class="code-actions">
-            <button class="btn-copy" onclick="copyCode(this)">Copy</button>
-        </div>
-    </div>
-    <pre><code class="language-sql">SELECT LAB_NAME, ROUND(SUM(SALES_USD) / SUM(SUM(SALES_USD)) OVER () * 100, 2) AS SHARE_PCT
-FROM CLOSEUP_HOL1.ANALYTICS.DT_MONTHLY_MARKET_SHARE
-GROUP BY LAB_NAME
-ORDER BY SHARE_PCT DESC;</code></pre>
-</div>
-
-<p>Chart: <strong>Bar</strong>, X = <code>LAB_NAME</code>, Y = <code>SHARE_PCT</code>.</p>
-
-<h3>5.4 Tile 3 &mdash; Prescriptions by specialty and therapeutic area (Heatgrid)</h3>
-<div class="code-block" data-language="sql">
-    <div class="code-header">
-        <span class="code-language">SQL</span>
-        <div class="code-actions">
-            <button class="btn-copy" onclick="copyCode(this)">Copy</button>
-        </div>
-    </div>
-    <pre><code class="language-sql">SELECT SPECIALTY, THERAPEUTIC_AREA, SUM(RX_COUNT) AS RX_COUNT
-FROM CLOSEUP_HOL1.ANALYTICS.DT_PRESCRIPTION_TRENDS
-GROUP BY 1, 2
-ORDER BY 1, 2;</code></pre>
-</div>
-
-<p>Chart: <strong>Heatgrid</strong>, rows = <code>SPECIALTY</code>, columns = <code>THERAPEUTIC_AREA</code>, cell = <code>RX_COUNT</code>.</p>
-
-<h3>5.5 Tile 4 &mdash; Top 10 pharmacies (Table) with a filter</h3>
-<div class="code-block" data-language="sql">
-    <div class="code-header">
-        <span class="code-language">SQL</span>
-        <div class="code-actions">
-            <button class="btn-copy" onclick="copyCode(this)">Copy</button>
-        </div>
-    </div>
-    <pre><code class="language-sql">SELECT PHARMACY_NAME, CHAIN, CITY, COUNTRY, SUM(NET_AMOUNT_USD) AS SALES_USD
-FROM CLOSEUP_HOL1.CURATED.V_SALES
-WHERE SALE_DATE = :daterange
-GROUP BY 1, 2, 3, 4
-ORDER BY SALES_USD DESC
-LIMIT 10;</code></pre>
-</div>
-
-<div class="info-box tip"><strong>System filters.</strong> <code>:daterange</code> is a built-in Snowsight filter: the dashboard shows a date picker at the top and every tile that uses it is filtered together.</div>
-
-<h3>5.6 Verification</h3>
-<p>Your dashboard shows 4 tiles and changing the date range updates Tile 4. Share it with a colleague via <strong>Share</strong> (top right).</p>
+<h3>5.4 Verification</h3>
+<ul>
+<li>The dashboard shows its tiles, and changing the date range updates the top-10 table.</li>
+<li>Clicking a lab in the market share chart filters the other tiles (a gray <em>Filtering &hellip;</em> banner appears).</li>
+<li>Both artifacts are listed under <strong>Projects &raquo; Artifacts</strong>.</li>
+</ul>
+<table>
+<tr><th></th><th>Dashboard</th><th>HTML report</th></tr>
+<tr><td>Data</td><td>Live, queries run on open</td><td>Snapshot embedded in the file</td></tr>
+<tr><td>Security</td><td>Viewer's own privileges</td><td>Anyone with access sees the content</td></tr>
+<tr><td>Best for</td><td>Exploring, filtering, follow-up questions in CoWork</td><td>Narratives, executive briefs, meeting pre-reads</td></tr>
+</table>
 <div class="info-box note"><strong>See you tomorrow!</strong> Do <em>not</em> run any cleanup today &mdash; Lab 1B continues from these objects.</div>
 </div>
 </section>
@@ -1155,7 +1174,7 @@ LIMIT 10;</code></pre>
 <li><a href="https://www.snowflake.com/en/developers/guides/sfguide-build-end-to-end-ai-app-on-snowflake/" target="_blank">Guide: Build an End-to-End AI App on Snowflake</a></li>
 <li><a href="https://www.snowflake.com/en/developers/guides/best-practices-to-building-cortex-agents/" target="_blank">Guide: Best Practices to Building Cortex Agents</a></li></ul></section>
 <section class="card completion" id="completion"><h2>Congratulations!</h2>
-<p>You built the data foundation: ingestion, storage, Dynamic Tables and a dashboard. Keep these objects &mdash; tomorrow in Lab 1B you turn them into an AI agent.</p></section>
+<p>You built the data foundation: ingestion, storage, Dynamic Tables, a dashboard and an HTML report. Keep these objects &mdash; tomorrow in Lab 1B you turn them into an AI agent.</p></section>
 </main></div>
 <footer>© 2026 Snowflake Inc. All Rights Reserved.</footer>
 <script>

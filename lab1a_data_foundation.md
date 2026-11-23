@@ -10,11 +10,11 @@
 - [Step 2: Ingestion: Stages & COPY (~15 min)](#step-2-ingestion-stages--copy-15-min)
 - [Step 3: Storage & Exploring Data (~8 min)](#step-3-storage--exploring-data-8-min)
 - [Step 4: Transformation: Views & Dynamic Tables (~12 min)](#step-4-transformation-views--dynamic-tables-12-min)
-- [Step 5: Your first Snowsight dashboard (~10 min)](#step-5-your-first-snowsight-dashboard-10-min)
+- [Step 5: Dashboards & reports with AI (~10 min)](#step-5-dashboards--reports-with-ai-10-min)
 
 ## Overview
 
-In this first part you build the data foundation of a pharma market intelligence solution on Snowflake: from raw operational files to curated, always-fresh analytics and a dashboard for business users.
+In this first part you build the data foundation of a pharma market intelligence solution on Snowflake: from raw operational files to curated, always-fresh analytics, a dashboard and a report for business users.
 
 ### What you will learn
 
@@ -22,14 +22,14 @@ In this first part you build the data foundation of a pharma market intelligence
 - Loading data with internal stages, file formats and COPY INTO (CSV and JSON)
 - Exploring, documenting and validating data quality; Time Travel
 - Building declarative transformations with views and Dynamic Tables
-- Building a Snowsight dashboard with charts and filters
+- Building AI-first Dashboards and HTML reports with CoCo, and sharing them as artifacts
 
 ### Technologies
 
-Snowsight · Virtual Warehouses · Stages & COPY · Time Travel · Views · Dynamic Tables · Dashboards
+Snowsight · Virtual Warehouses · Stages & COPY · Time Travel · Views · Dynamic Tables · Dashboards · HTML Reports · CoCo
 
 > **Day 1 of 2 (25/11).**  This is Lab 1A: the data foundation
-> (ingestion, storage, transformation and a dashboard). Tomorrow, Lab 1B continues from the objects you create today
+> (ingestion, storage, transformation, a dashboard and a report). Tomorrow, Lab 1B continues from the objects you create today
 > and adds AI, the semantic layer and the agent.
 
 > **Synthetic data** All data in this lab (pharmacies, laboratories, products, doctors, prescriptions, sales and field notes) is synthetically generated for training purposes only. It does not represent real Close-Up, customer or market data.
@@ -867,66 +867,83 @@ Expected: `TOTAL_SHARE_PCT` is 100.00 (or 99.99 / 100.01 due to rounding) for ev
 
 ---
 
-## Step 5: Your first Snowsight dashboard (~10 min)
+## Step 5: Dashboards & reports with AI (~10 min)
 
-You now have curated views and Dynamic Tables. Before going to AI tomorrow, let's turn them into a
-**Snowsight dashboard** — no BI tool required. Each tile is just a SQL query plus a chart.
+You now have curated views and Dynamic Tables. Before going to AI tomorrow, let's put them in front of
+business users with two **AI-first** artifacts, both created by talking to **CoCo** (Cortex Code) in Snowsight
+Workspaces — no BI tool, no extracts:
 
-### 5.1 Create the dashboard
+- **Dashboard** — live, interactive tiles. Each viewer's queries run with *their own* role (caller's rights).
+- **HTML report** — a designed, presentation-ready snapshot of the analysis, shareable as a link.
 
-1. In Snowsight go to **Projects » Dashboards » + Dashboard**. Name it `Close-Up Market Overview`.
-2. Set the role to `ACCOUNTADMIN` and the warehouse to `CLOSEUP_HOL1_WH` (top right).
-3. Click **+ New Tile » From SQL Worksheet** for each query below, run it, open the **Chart** tab and pick the chart type suggested.
+> **Why not "Projects » Dashboards"?**  Legacy Dashboards were removed from
+> Snowflake on 22/06/2026. Dashboards are now authored in Workspaces as a `.dash` file and shared as an **artifact**.
 
-### 5.2 Tile 1 — Monthly sales trend (Line chart)
+### 5.1 Build the dashboard with CoCo (~5 min)
 
-```sql
-SELECT MONTH, SUM(SALES_USD) AS SALES_USD
-FROM CLOSEUP_HOL1.ANALYTICS.DT_MONTHLY_MARKET_SHARE
-GROUP BY MONTH
-ORDER BY MONTH;
+1. In Snowsight go to **Projects » Workspaces** and open your workspace.
+2. Select **+ (Add new) » Dashboard** (or open the CoCo chat panel). Make sure the context is role `ACCOUNTADMIN` and warehouse `CLOSEUP_HOL1_WH`.
+3. Paste the prompt below and review the SQL that CoCo proposes before accepting it.
+
+```text
+/dashboard Build a dashboard called "Close-Up Market Overview" using CLOSEUP_HOL1.ANALYTICS.DT_MONTHLY_MARKET_SHARE,
+CLOSEUP_HOL1.ANALYTICS.DT_PRESCRIPTION_TRENDS and CLOSEUP_HOL1.CURATED.V_SALES with:
+1. A scorecard with total SALES_USD
+2. A line chart of monthly SALES_USD
+3. A bar chart of market share % by LAB_NAME
+4. A heatmap of RX_COUNT by SPECIALTY and THERAPEUTIC_AREA
+5. A table with the top 10 pharmacies by NET_AMOUNT_USD from V_SALES
+Add a date range filter on SALE_DATE that applies to the top-10 table.
 ```
 
-Chart: **Line**, X = `MONTH`, Y = `SALES_USD`.
+CoCo generates a `.dash` file and opens it. Now iterate in plain language — this is the point of AI-first BI:
 
-### 5.3 Tile 2 — Market share by laboratory (Bar chart)
-
-```sql
-SELECT LAB_NAME, ROUND(SUM(SALES_USD) / SUM(SUM(SALES_USD)) OVER () * 100, 2) AS SHARE_PCT
-FROM CLOSEUP_HOL1.ANALYTICS.DT_MONTHLY_MARKET_SHARE
-GROUP BY LAB_NAME
-ORDER BY SHARE_PCT DESC;
+```text
+When someone clicks a lab in the market share chart, filter the other tiles to that lab.
 ```
 
-Chart: **Bar**, X = `LAB_NAME`, Y = `SHARE_PCT`.
-
-### 5.4 Tile 3 — Prescriptions by specialty and therapeutic area (Heatgrid)
-
-```sql
-SELECT SPECIALTY, THERAPEUTIC_AREA, SUM(RX_COUNT) AS RX_COUNT
-FROM CLOSEUP_HOL1.ANALYTICS.DT_PRESCRIPTION_TRENDS
-GROUP BY 1, 2
-ORDER BY 1, 2;
+```text
+Change the line chart to show one line per COUNTRY.
 ```
 
-Chart: **Heatgrid**, rows = `SPECIALTY`, columns = `THERAPEUTIC_AREA`, cell = `RX_COUNT`.
+> **Prefer to build it by hand?**  You can add tiles, write tile SQL and pick charts
+> without CoCo. Filters are wired into tile SQL with a `{{ filter('name') }}` placeholder, for example:
+> `WHERE {{ filter('sale_date') }}`. The reference queries are in `sql/lab1a/step05.sql` in the repo.
 
-### 5.5 Tile 4 — Top 10 pharmacies (Table) with a filter
+### 5.2 Build an HTML report with CoCo (~3 min)
 
-```sql
-SELECT PHARMACY_NAME, CHAIN, CITY, COUNTRY, SUM(NET_AMOUNT_USD) AS SALES_USD
-FROM CLOSEUP_HOL1.CURATED.V_SALES
-WHERE SALE_DATE = :daterange
-GROUP BY 1, 2, 3, 4
-ORDER BY SALES_USD DESC
-LIMIT 10;
+Dashboards are for exploring; a report is for *telling the story* (e.g. a deck-like brief for a meeting).
+In the same workspace select **+ (Add new) » Report**, or ask CoCo:
+
+```text
+Create an HTML report "Close-Up Market Brief" from CLOSEUP_HOL1.ANALYTICS.DT_MONTHLY_MARKET_SHARE:
+a headline with total sales and the top laboratory, a monthly sales trend chart, a market share bar chart
+and 3 bullet-point insights. Use Snowflake colors and format it as full-width sections that scroll like slides.
 ```
 
-> **System filters.**  `:daterange` is a built-in Snowsight filter: the dashboard shows a date picker at the top and every tile that uses it is filtered together.
+CoCo runs the queries, writes an `.html` file in your workspace and shows a preview. Use **Edit**
+to tweak text directly (Preview / No JavaScript / Code modes).
 
-### 5.6 Verification
+> **Snapshot data.**  A report embeds the query results at the moment it was generated.
+> Anyone who can view it sees that data, even without access to the tables. Use **Refresh report** and publish again to update it.
 
-Your dashboard shows 4 tiles and changing the date range updates Tile 4. Share it with a colleague via **Share** (top right).
+### 5.3 Publish and share (~2 min)
+
+1. Open the `.dash` file and select **Publish artifact**. Under **Who has access** keep yourself (or add a role) and select **Create**. The link is copied.
+2. Do the same for the `.html` report.
+3. Open **Projects » Artifacts**: both appear there. Later edits to the files are published to the *same* link.
+
+### 5.4 Verification
+
+- The dashboard shows its tiles, and changing the date range updates the top-10 table.
+- Clicking a lab in the market share chart filters the other tiles (a gray *Filtering …* banner appears).
+- Both artifacts are listed under **Projects » Artifacts**.
+
+|  | Dashboard | HTML report |
+| --- | --- | --- |
+| Data | Live, queries run on open | Snapshot embedded in the file |
+| Security | Viewer's own privileges | Anyone with access sees the content |
+| Best for | Exploring, filtering, follow-up questions in CoWork | Narratives, executive briefs, meeting pre-reads |
 
 > **See you tomorrow!**  Do *not* run any cleanup today — Lab 1B continues from these objects.
 
@@ -940,7 +957,7 @@ Your dashboard shows 4 tiles and changing the date range updates Tile 4. Share i
 
 ## Congratulations!
 
-You built the data foundation: ingestion, storage, Dynamic Tables and a dashboard. Keep these objects — tomorrow in Lab 1B you turn them into an AI agent.
+You built the data foundation: ingestion, storage, Dynamic Tables, a dashboard and an HTML report. Keep these objects — tomorrow in Lab 1B you turn them into an AI agent.
 
 ---
 
