@@ -747,6 +747,14 @@ SELECT 'FIELD_NOTES', MIN(NOTE_DATE), MAX(NOTE_DATE), DATEDIFF(MONTH, MIN(NOTE_D
 FROM CLOSEUP_HOL1.RAW.FIELD_NOTES;</code></pre>
 </div>
 
+<div class="info-box warning"><strong>In real life the RAW layer is rarely this clean.</strong> Every check above returns 0 because the lab data is synthetic and was generated clean. Real sources bring duplicates from re-sent files, sales that arrive before the pharmacy or product exists (orphan keys), negative units, future dates, &quot;N/A&quot; strings instead of NULLs, and schema changes at the source. Keep in mind:
+<ul>
+<li><strong>Snowflake does not enforce PRIMARY KEY, UNIQUE or FOREIGN KEY constraints.</strong> They are informational; only <code>NOT NULL</code> is enforced. That is why duplicate and orphan checks like the ones above are needed.</li>
+<li><strong>At load time</strong>, <code>COPY INTO</code> can test files before loading (<code>VALIDATION_MODE = RETURN_ERRORS</code>), or load the good rows and skip the bad ones (<code>ON_ERROR = CONTINUE</code>, then inspect them with <code>VALIDATE()</code>).</li>
+<li><strong>Continuously</strong>, <strong>Data Metric Functions</strong> (Enterprise Edition) run checks such as <code>NULL_COUNT</code>, <code>DUPLICATE_COUNT</code>, <code>ROW_COUNT</code>, <code>FRESHNESS</code> and <code>ACCEPTED_VALUES</code> on a schedule, and show the results in the Data Quality tab in Snowsight. You can also write custom ones, such as an orphan-key check.</li>
+<li><strong>In the pipeline</strong>, the curated layer (Step 4) is where bad rows are filtered, fixed or moved to a quarantine table instead of flowing into the reports.</li>
+</ul></div>
+
 <h3>3.3 How Snowflake stores data: micro-partitions and Time Travel</h3>
 <p>Every table is automatically split into immutable, compressed, columnar <strong>micro-partitions</strong> (50&ndash;500 MB uncompressed each). For each partition Snowflake stores metadata such as the min/max value of every column, so a filter like <code>WHERE SALE_DATE &gt;= '2026-01-01'</code> reads only the partitions that can contain matching rows (<em>partition pruning</em>). No indexes or manual partitioning are needed. Because partitions are never modified in place (changes write new partitions), Snowflake can keep previous versions. This is <strong>Time Travel</strong>: you can query, clone or restore a table as it was at a point in the past (1 day by default, up to 90 days on Enterprise Edition), and recover dropped objects with <code>UNDROP</code>.</p>
 

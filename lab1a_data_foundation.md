@@ -608,6 +608,13 @@ SELECT 'FIELD_NOTES', MIN(NOTE_DATE), MAX(NOTE_DATE), DATEDIFF(MONTH, MIN(NOTE_D
 FROM CLOSEUP_HOL1.RAW.FIELD_NOTES;
 ```
 
+> **In real life the RAW layer is rarely this clean.** Every check above returns 0 because the lab data is synthetic and was generated clean. Real sources bring duplicates from re-sent files, sales that arrive before the pharmacy or product exists (orphan keys), negative units, future dates, "N/A" strings instead of NULLs, and schema changes at the source. Keep in mind:
+>
+> - **Snowflake does not enforce PRIMARY KEY, UNIQUE or FOREIGN KEY constraints.** They are informational; only `NOT NULL` is enforced. That is why duplicate and orphan checks like the ones above are needed.
+> - **At load time**, `COPY INTO` can test files before loading (`VALIDATION_MODE = RETURN_ERRORS`), or load the good rows and skip the bad ones (`ON_ERROR = CONTINUE`, then inspect them with `VALIDATE()`).
+> - **Continuously**, **Data Metric Functions** (Enterprise Edition) run checks such as `NULL_COUNT`, `DUPLICATE_COUNT`, `ROW_COUNT`, `FRESHNESS` and `ACCEPTED_VALUES` on a schedule, and show the results in the Data Quality tab in Snowsight. You can also write custom ones, such as an orphan-key check.
+> - **In the pipeline**, the curated layer (Step 4) is where bad rows are filtered, fixed or moved to a quarantine table instead of flowing into the reports.
+
 ### 3.3 How Snowflake stores data: micro-partitions and Time Travel
 
 Every table is automatically split into immutable, compressed, columnar **micro-partitions** (50–500 MB uncompressed each). For each partition Snowflake stores metadata such as the min/max value of every column, so a filter like `WHERE SALE_DATE >= '2026-01-01'` reads only the partitions that can contain matching rows (*partition pruning*). No indexes or manual partitioning are needed. Because partitions are never modified in place (changes write new partitions), Snowflake can keep previous versions. This is **Time Travel**: you can query, clone or restore a table as it was at a point in the past (1 day by default, up to 90 days on Enterprise Edition), and recover dropped objects with `UNDROP`.

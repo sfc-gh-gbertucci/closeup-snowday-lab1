@@ -146,6 +146,37 @@ LIMIT 300;
 
 ### 2.3 Explore the results
 
+**Before and after.** Put the raw note next to what the AI added. Before, each note is only free text: to know whether it is negative or about a competitor, someone has to read it. After, the same note has structured columns that you can filter, group and count.
+
+```sql
+-- BEFORE (RAW.FIELD_NOTES) vs AFTER (AI.FIELD_NOTES_ENRICHED), side by side
+SELECT
+    r.NOTE_ID,
+    r.COUNTRY,
+    r.NOTE_TEXT              AS before_raw_text,
+    e.SENTIMENT              AS after_sentiment,
+    e.CATEGORY               AS after_category,
+    e.SUMMARY                AS after_summary,
+    LENGTH(r.NOTE_TEXT)      AS raw_chars,
+    LENGTH(e.SUMMARY)        AS summary_chars
+FROM CLOSEUP_HOL1.RAW.FIELD_NOTES r
+JOIN CLOSEUP_HOL1.AI.FIELD_NOTES_ENRICHED e
+  ON e.NOTE_ID = r.NOTE_ID
+ORDER BY r.NOTE_ID
+LIMIT 10;
+
+-- A question that was impossible BEFORE (free text only) and is one GROUP BY AFTER:
+-- "Which countries have the most negative notes about competitor activity?"
+SELECT COUNTRY, COUNT(*) AS negative_competitor_notes
+FROM CLOSEUP_HOL1.AI.FIELD_NOTES_ENRICHED
+WHERE CATEGORY = 'Competitor Activity'
+  AND SENTIMENT = 'negative'
+GROUP BY COUNTRY
+ORDER BY negative_competitor_notes DESC;
+```
+
+> **What to notice:** the long `before_raw_text` becomes a sentiment label, one of five categories and a summary of about 20 words. If the last query returns no rows, run `SELECT DISTINCT SENTIMENT FROM CLOSEUP_HOL1.AI.FIELD_NOTES_ENRICHED;` to check which labels your model returned.
+
 ```sql
 -- Look at the enriched rows
 SELECT NOTE_ID, COUNTRY, SENTIMENT, CATEGORY, SUMMARY, NOTE_TEXT
