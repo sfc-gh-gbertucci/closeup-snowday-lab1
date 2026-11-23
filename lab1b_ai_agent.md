@@ -77,6 +77,18 @@ AI functions on field notes, a semantic view, a search service and an agent — 
 
 ## Step 2: AI on Data: Cortex AI Functions (~10 min)
 
+**What this step does:** reads the free-text field notes and lets AI functions add three structured columns, so the text can be filtered, grouped and counted.
+
+```text
+RAW.FIELD_NOTES (free text) ──► AI functions (in plain SQL) ──► AI.FIELD_NOTES_ENRICHED (+ SENTIMENT · CATEGORY · SUMMARY)
+```
+
+| Function | Adds | Example output |
+| --- | --- | --- |
+| `AI_SENTIMENT` | `SENTIMENT` | positive / negative / neutral |
+| `AI_CLASSIFY` | `CATEGORY` | one of 5 labels, e.g. Competitor Activity |
+| `AI_COMPLETE` | `SUMMARY` | one sentence of at most 20 words |
+
 Close-Up's field force produces hundreds of free-text notes: competitor launches, stock-outs, price
 changes, doctor feedback, regulatory news. With **Snowflake Cortex AISQL** functions we can turn that
 unstructured text into structured, queryable columns, with plain SQL, without moving the data out of Snowflake.
@@ -244,6 +256,12 @@ Expected: `TOTAL_NOTES = 300` and all `MISSING_*` columns = 0.
 - **Take it to your projects:** any free-text column (call notes, complaints, survey answers) can be enriched the same way with a single `CREATE TABLE ... AS SELECT`.
 
 ## Step 3: Semantic Layer: Semantic Views (~15 min)
+
+**What this step does:** writes down the business meaning of the data (tables, joins, metrics, synonyms) in a semantic view, so AI can turn a question into correct SQL.
+
+```text
+RAW / CURATED tables (the data) ──► SV_PHARMA_MARKET (tables · joins · metrics · synonyms) ──► Cortex Analyst (question → SQL)
+```
 
 An LLM does not know that "sell-out", "revenue" and `NET_AMOUNT_USD` mean the same thing, which
 table holds the therapeutic area, or how to compute market share. A **semantic view** is a schema-level
@@ -476,6 +494,12 @@ Expected: one row per country with `TOTAL_SHARE_PCT = 100.00`.
 
 ## Step 4: Cortex Search (~8 min)
 
+**What this step does:** makes the enriched field notes searchable by meaning, not only by exact words.
+
+```text
+AI.FIELD_NOTES_ENRICHED (notes + AI columns) ──► CS_FIELD_NOTES (Cortex Search service) ──► Relevant notes (ranked by meaning)
+```
+
 ### What is Cortex Search?
 
 Cortex Analyst (via the semantic view from step 3) answers **structured** questions with SQL. But a large part of market intelligence lives in **unstructured text**: the field notes written by reps about competitor launches, stock-outs, price changes and doctor feedback. **Cortex Search** is Snowflake's fully managed retrieval engine for that text.
@@ -586,6 +610,14 @@ FROM TABLE(FLATTEN(
 - **Two tools ready:** the semantic view answers questions about numbers; Cortex Search answers questions about what the representatives wrote.
 
 ## Step 5: Build the Agent (~15 min)
+
+**What this step does:** combines the two tools you built into one agent that decides, for each question, whether it needs numbers, text, or both.
+
+```text
+SV_PHARMA_MARKET (semantic view) ──► market_analytics (tool: numbers)
+CS_FIELD_NOTES (search service) ──► field_intelligence (tool: what reps wrote)
+Question (in natural language) ──► PHARMA_MARKET_AGENT (picks the tool(s)) ──► Answer (numbers + context)
+```
 
 ### From tools to an agent
 
@@ -823,6 +855,12 @@ DESCRIBE AGENT SNOWFLAKE_INTELLIGENCE.AGENTS.PHARMA_MARKET_AGENT;
 
 ## Step 6: Use the Agent in Snowflake Intelligence (~12 min)
 
+**What this step does:** business users ask questions in Snowflake Intelligence; the agent answers with the same governed data the analysts use.
+
+```text
+Business user (asks a question) ──► Snowflake Intelligence (chat interface) ──► PHARMA_MARKET_AGENT (semantic view + search) ──► Answer (with the role of the user)
+```
+
 ### Open Snowflake Intelligence (CoWork)
 
 1. Open [ai.snowflake.com](https://ai.snowflake.com) (or in Snowsight: **AI & ML → Snowflake Intelligence**) and sign in with the same account.
@@ -916,6 +954,13 @@ SHOW SEMANTIC VIEWS IN SCHEMA CLOSEUP_HOL1.ANALYTICS;
 - **Take it to your projects:** start with a small set of well-defined questions, add them as verified queries, and grow the agent from real usage.
 
 ## Step 7: Security & Consumption (~10 min)
+
+**What this step does:** gives business users a least-privilege role and puts a credit guardrail on the warehouse.
+
+```text
+User ──► HOL1_BUSINESS_USER (role) ──► Curated data + agent (read only)
+CLOSEUP_HOL1_WH (warehouse) ──► CLOSEUP_HOL1_RM (resource monitor) ──► Notify / suspend (at the credit quota)
+```
 
 An agent is only production-ready when the right people can use it — and nobody can overspend.
 This step uses features available in **every edition**, including Standard.

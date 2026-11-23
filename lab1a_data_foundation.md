@@ -38,6 +38,18 @@ Snowsight · Virtual Warehouses · Stages & COPY · Time Travel · Views · Dyna
 
 ## Step 1: Snowflake in 5 minutes (~5 min)
 
+**What this step does:** creates the place where everything in the lab lives: a warehouse (the compute that runs your queries) and a database with one schema per stage of the data flow.
+
+```text
+SOURCE_SYSTEM (simulated source) ──► RAW (data as loaded) ──► CURATED (clean, joined views) ──► ANALYTICS (aggregated tables) ──► AI (AI-enriched data (Lab 1B))
+```
+
+| Object | What it is | Think of it as |
+| --- | --- | --- |
+| Warehouse `CLOSEUP_HOL1_WH` | Compute that runs queries. Billed per second, suspends itself when idle. | The engine |
+| Database `CLOSEUP_HOL1` | Container for all the schemas and tables of the lab. | The building |
+| Schema (`RAW`, `CURATED`…) | A group of tables for one stage of the flow. | A floor of the building |
+
 ### Snowflake in five minutes
 
 Snowflake is a fully managed data platform for storing, processing, sharing and running AI on data. Nothing needs to be installed, tuned or patched. It has three layers that scale independently:
@@ -121,6 +133,20 @@ SHOW WAREHOUSES LIKE 'CLOSEUP_HOL1_WH';
 - **Take it to your projects:** one schema per layer (raw, curated, analytics) keeps the flow easy to read and makes it simple to grant access by layer.
 
 ## Step 2: Ingestion: Stages & COPY (~15 min)
+
+**What this step does:** simulates a real project: the data leaves a source system as files (CSV and JSON), lands in a stage, and `COPY INTO` loads it into the RAW tables.
+
+```text
+SOURCE_SYSTEM (7 source tables) ──► LANDING_STAGE (CSV + JSON files) ──► COPY INTO (parsed with FF_CSV / FF_JSON) ──► RAW (7 tables, as loaded)
+FIELD_NOTES_JSON (one VARIANT column) ──► :field::TYPE (typing the JSON) ──► RAW.FIELD_NOTES (typed columns)
+```
+
+| Piece | What it does | Think of it as |
+| --- | --- | --- |
+| Stage `LANDING_STAGE` | A place inside Snowflake where files wait to be loaded. | The loading dock |
+| File format `FF_CSV` / `FF_JSON` | Reusable rules for reading a file: delimiter, header, compression… | The reading instructions |
+| `COPY INTO` | Reads the files from the stage and inserts the rows into a table. Remembers which files it already loaded. | The forklift |
+| `VARIANT` | A column type that stores JSON as-is, queried with `:field`. | A box that takes any shape |
 
 ### The scenario
 
@@ -663,6 +689,20 @@ ORDER BY TABLE_NAME, ORDINAL_POSITION;
 
 ## Step 4: Transformation: Views & Dynamic Tables (~12 min)
 
+**What this step does:** turns raw tables into business-ready data in two ways: **views** in CURATED (logic computed on every read) and **Dynamic Tables** in ANALYTICS (results stored and refreshed automatically).
+
+```text
+RAW tables (sell-out, products, labs, pharmacies…) ──► CURATED views (V_SALES · V_PRESCRIPTIONS)
+RAW tables (same sources) ──► ANALYTICS Dynamic Tables (DT_MONTHLY_MARKET_SHARE · DT_PRESCRIPTION_TRENDS) ──► Dashboards & reports (Step 5)
+```
+
+|  | View | Dynamic Table |
+| --- | --- | --- |
+| Stores data? | No, only the query | Yes, the result |
+| Freshness | Always current | Within the target lag (1 hour here) |
+| Compute | Every time someone reads it | Only when it refreshes |
+| Best for | Business logic and joins | Heavy aggregations read often |
+
 Raw data is rarely ready for analysis. In this step we build a simple, layered architecture
 (a "medallion-ish" design) entirely inside Snowflake, using only SQL:
 
@@ -901,6 +941,12 @@ Expected: `TOTAL_SHARE_PCT` is 100.00 (or 99.99 / 100.01 due to rounding) for ev
 - **Take it to your projects:** use views for logic that must always be current and cheap to define; use Dynamic Tables for heavier aggregations that dashboards read often.
 
 ## Step 5: Dashboards & reports with AI (~10 min)
+
+**What this step does:** puts the analytics layer in front of people: you ask CoCo for a dashboard and an HTML report, then publish and share them.
+
+```text
+ANALYTICS (Dynamic Tables) ──► CoCo (prompt in natural language) ──► Dashboard + HTML report (built by AI) ──► Publish & share (governed by roles)
+```
 
 You now have curated views and Dynamic Tables. Before going to AI tomorrow, let's put them in front of
 business users with two **AI-first** artifacts, both created by talking to **CoCo** (Cortex Code) in Snowsight
